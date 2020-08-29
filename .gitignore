@@ -1,0 +1,7 @@
+*.model
+*.mymodel
+*.zip
+*.pkl
+*.pth
+*.out
+*.prj_model

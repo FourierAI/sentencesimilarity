@@ -1,0 +1,11 @@
+dimension:  100
+pre_train:  false
+pre_train_model:  Word2Vec
+# 0:CBOW 1:skip-gram
+Word2Vec_model: 0
+Word2Vec_WindowSize: 5
+Word2Vec_Worker:  5
+Word2Vec_minicount: 0
+
+
+
