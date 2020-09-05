@@ -23,12 +23,21 @@ class SimaeseNet(nn.Module):
         embedding_config = EmbeddingConfig()
         embedding_dimension = embedding_config.dimension
 
-        self.rnn = nn.LSTM(
-            input_size=embedding_dimension,
-            hidden_size=embedding_dimension * 2,
-            num_layers=1,
-            batch_first=True,  # e.g. (batch, time_step, input_size)
-        )
+        if embedding_config.pre_train == False:
+            self.rnn = nn.LSTM(
+                input_size=embedding_dimension,
+                hidden_size=embedding_dimension * 2,
+                num_layers=1,
+                batch_first=True,  # e.g. (batch, time_step, input_size)
+            )
+        else:
+            # Default Bert dimension 768
+            self.rnn = nn.LSTM(
+                input_size=768,
+                hidden_size=200,
+                num_layers=1,
+                batch_first=True,  # e.g. (batch, time_step, input_size)
+            )
 
     def forward(self, x, y):
         x_out, (h_nx, h_cx) = self.rnn(x, None)

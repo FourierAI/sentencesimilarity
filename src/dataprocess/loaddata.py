@@ -7,10 +7,9 @@
 # @time: 2020-07-06 09:55
 # @desc:
 
-import pandas as pd
-import numpy as np
 import csv
-import torch
+
+import pandas as pd
 from nltk.tokenize import word_tokenize
 
 
@@ -42,6 +41,14 @@ def load_score(data_set='sts', type='train'):
     train_df = load_data_csv(data_set=data_set, type=type)
     train_score = train_df.iloc[:, [4]].values
     return train_score
+
+
+def load_sents_score(type='train'):
+    df = load_data_csv('sts', type)
+    sents_left = df.iloc[:, [5]].values
+    sents_right = df.iloc[:, [6]].values
+    score = df.iloc[:, [4]].values
+    return sents_left, sents_right, score
 
 
 def load_all_sents(data_set='sts'):

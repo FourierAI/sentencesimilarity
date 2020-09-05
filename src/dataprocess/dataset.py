@@ -38,29 +38,38 @@ class StsDataset(Dataset):
 
         sents_left, sents_right, score = self.load_sents_pair(data_frame)
 
-        if dataset_type == 'train':
-            whole_sents = ld.load_all_sents()
-            word_set, word_dict = self.get_wordset_and_worddict(whole_sents)
+        if embedding_config.pre_train == False:
+            if dataset_type == 'train':
+                whole_sents = ld.load_all_sents()
+                word_set, word_dict = self.get_wordset_and_worddict(whole_sents)
 
-            word_capability = len(word_set)
-            word_embedding = torch.nn.Embedding(word_capability, embedding_config.dimension)
-            with open('word_dict.model', 'wb') as file:
-                pickle.dump(word_dict, file)
-            with open('word_embedding.model', 'wb') as file:
-                pickle.dump(word_embedding, file)
+                word_capability = len(word_set)
+                word_embedding = torch.nn.Embedding(word_capability, embedding_config.dimension)
+                with open('word_dict.model', 'wb') as file:
+                    pickle.dump(word_dict, file)
+                with open('word_embedding.model', 'wb') as file:
+                    pickle.dump(word_embedding, file)
+            else:
+                with open('word_dict.model', 'rb') as file:
+                    word_dict = pickle.load(file)
+
+                with open('word_embedding.model', 'rb') as file:
+                    word_embedding = pickle.load(file)
+
+            left_sents_embedding = self.sent2tensor(sents_left, word_embedding, word_dict)
+            right_sents_embedding = self.sent2tensor(sents_right, word_embedding, word_dict)
+            score = score[:, 0].tolist()
+
+            for index, value in enumerate(score):
+                self.samples.append((left_sents_embedding[index], right_sents_embedding[index], score[index]))
         else:
-            with open('word_dict.model', 'rb') as file:
-                word_dict = pickle.load(file)
 
-            with open('word_embedding.model', 'rb') as file:
-                word_embedding = pickle.load(file)
-
-        left_sents_embedding = self.sent2tensor(sents_left, word_embedding, word_dict)
-        right_sents_embedding = self.sent2tensor(sents_right, word_embedding, word_dict)
-        score = score[:, 0].tolist()
-
-        for index, value in enumerate(score):
-            self.samples.append((left_sents_embedding[index], right_sents_embedding[index], score[index]))
+            file_name = '../dataset/stsbenchmark/' + dataset_type + '.pkl'
+            with open(file_name, 'rb') as file:
+                data_list = pickle.load(file)
+            for left_sent_embedding, right_sent_embedding, score in data_list:
+                self.samples.append(
+                    (torch.tensor(left_sent_embedding), torch.tensor(right_sent_embedding), torch.tensor(score)))
 
     def __len__(self):
         return len(self.samples)
@@ -116,10 +125,7 @@ if __name__ == "__main__":
     dataset = StsDataset('test')
     dataloader = DataLoader(dataset, batch_size=50, shuffle=True, num_workers=0, collate_fn=dataset.collate_fn)
 
-    # for step, batch in enumerate(dataloader):
-    #     left_sent, left_len, right_sent, right_len, score = batch
-    #
-    #     print('score', score)
+    for step, batch in enumerate(dataloader):
+        left_sent, left_len, right_sent, right_len, score = batch
 
-    for value in dataset:
-        print(value)
+        print('score', score)

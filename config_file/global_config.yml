@@ -1,4 +1,4 @@
-train_or_test:  'test'
+train_or_test:  'train'
 data_set: 'sts'
 epoch:  50
 batch_size: 50
